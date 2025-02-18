@@ -14,8 +14,8 @@ const emailRegister = async (datos) => {
     const {name, email, token} = datos;
 
     const mailOptions = {
-        from: `"WorlsxMap" <${process.env.EMAIL_USER}>`, // sender address
-        to: email, // list of receivers
+        from: `"WorlsxMap" <${process.env.EMAIL_USER}>`, 
+        to: email, 
         subject: 'Verify your account in WsxM',
         text: 'Verify your account in WsxM',
         html: `<p>Hello ${name}, please verify your account by clicking the following link: <a href="${process.env.FRONTEND_URL}/confirm/${token}">Verify Account</a></p>
