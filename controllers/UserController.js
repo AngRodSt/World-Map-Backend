@@ -2,6 +2,7 @@ import User from "../models/User.js";
 import generateId from "../helpers/generateId.js";
 import generateJwt from "../helpers/generateJwt.js";
 import emailRegister from "../helpers/emailRegister.js";
+import mongoose from "mongoose";
 
 const register = async (req, res) => {
     const { email, name } = req.body
@@ -50,9 +51,50 @@ const confirm = async (req, res) => {
 }
 
 const profile = async (req, res) => {
-    const {user} = req
+    const user = req.user.toObject();
 
-     res.json({user})
+    const updatedUser = {...user, avatar: user.avatar?{data: user.avatar.data.toString('base64'), contentType: user.avatar.contentType} : null} 
+    res.json({updatedUser})
+    
+    
+ }
+ 
+const updateProfile = async (req, res) => {
+    const {id} = req.params
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ message: 'Invalid ID' });
+    }
+
+    const currentUser = await User.findById(id);
+
+    if (!currentUser) {
+        return res.status(400).json({ msg: "Non-existent Note" })
+    }
+
+    if (currentUser._id.toString() !== id.toString()) {
+        return res.status(400).json({ msg: "Invalid Action" })
+    }
+
+
+    currentUser.name = req.body.name || currentUser.name
+    currentUser.phone = req.body.phone || currentUser.phone
+    currentUser.birthDate = req.body.birthDate || currentUser.birthDate
+    currentUser.profession = req.body.profession || currentUser.profession
+    currentUser.bio = req.body.bio || currentUser.bio
+
+    if (req.file) {
+        currentUser.avatar.data = req.file.buffer;
+        currentUser.avatar.contentType = req.file.mimetype;
+    }
+
+    try {
+        const updatedcurrentUser = await currentUser.save();
+        res.json(updatedcurrentUser);
+
+    } catch (error) {
+        console.log(error)
+    }
     
  }
  
@@ -74,9 +116,13 @@ const authenticate = async (req, res) => {
     if (await existUser.checkPassword(password)) {
         res.json({
             _id: existUser._id,
+            avatar: existUser.avatar,
             name: existUser.name,
             email: existUser.email,
-            token: generateJwt(existUser.id)
+            phone: existUser.phone,
+            bio: existUser.bio,
+            profession: existUser.profession,
+            token: generateJwt(existUser.id),
         })
     }
     else {
@@ -91,5 +137,6 @@ export {
     register,
     confirm,
     authenticate,
-    profile
+    profile,
+    updateProfile
 }

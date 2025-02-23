@@ -1,16 +1,22 @@
 import express from 'express'
-import { register, authenticate, confirm, profile } from '../controllers/UserController.js';
+import multer from 'multer';
+import { register, authenticate, confirm, profile, updateProfile } from '../controllers/UserController.js';
 import { saveCountry, getCountrys, deleteCountry, updateCountry } from '../controllers/MapController.js';
 import { saveNote, getNotes, deleteNote, updateNote } from '../controllers/NoteController.js';
 import checkAuth from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
+/*Configure Multer*/
+const storage = multer.memoryStorage();
+const upload = multer({storage})
+
 /*User Routes*/
 router.post("/", register)
 router.post("/login", authenticate)
 router.get("/confirm/:token", confirm)
 router.get("/profile", checkAuth, profile)
+router.post("/profile/:id", upload.single('avatar'), checkAuth, updateProfile)
 
 /*Country Routes*/
 router.route("/country").post(checkAuth, saveCountry).get(checkAuth, getCountrys)

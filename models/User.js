@@ -8,6 +8,27 @@ const UserSchema = mongoose.Schema({
         required: true,
         trim: true
     },
+    avatar: {
+        data: Buffer,
+        contentType: String
+    },
+    bio: {
+        type: String,
+        required: false,
+        trim: true
+    },
+    phone: {
+        type: String,
+        required: false
+    },
+    birthDate: {
+        type: Date,
+        required: false
+    },
+    profession: {
+        type: String,
+        required: false
+    },
     email:{
         type: String,
         required: true,
