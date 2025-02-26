@@ -10,6 +10,33 @@ const getNotes = async (req, res) => {
     res.json(notes)
 }
 
+
+const filterNote = async (req, res) => {
+    const { country, date } = req.body
+    try {
+        const notes = await Note.find()
+            .where("user")
+            .equals(req.user)
+
+        const filteredNotes = notes.filter(note => {
+            const noteDate = new Date(note.date).toISOString().split('T')[0];
+            if (date && country) {
+                return noteDate === date && note.country === country
+            }
+            else if (!country) {
+                return noteDate === date
+            }
+            else {
+                return note.country === country
+            }
+
+        })
+        res.json(filteredNotes);
+    } catch (error) {
+        res.status(500).json({ message: "Server error", error });
+    }
+
+}
 const saveNote = async (req, res) => {
     const note = new Note(req.body)
     note.user = req.user._id
@@ -72,17 +99,18 @@ const deleteNote = async (req, res) => {
 
     try {
         await note.deleteOne();
-        res.json({msg: "Note Deleted"})
+        res.json({ msg: "Note Deleted" })
     } catch (error) {
         console.log(error)
     }
 
-   
+
 }
 
 export {
     getNotes,
     saveNote,
     deleteNote,
-    updateNote
+    updateNote,
+    filterNote
 }

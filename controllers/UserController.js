@@ -31,36 +31,36 @@ const register = async (req, res) => {
 }
 
 const confirm = async (req, res) => {
-   const {token} = req.params
+    const { token } = req.params
 
-   const confirmedUser = await User.findOne({token})
-   if(!confirmedUser){
-    const error = new Error('Invalid Token');
-    return res.status(404).json({ msg: error.message })
-   }
+    const confirmedUser = await User.findOne({ token })
+    if (!confirmedUser) {
+        const error = new Error('Invalid Token');
+        return res.status(404).json({ msg: error.message })
+    }
 
-   try {
-    confirmedUser.token = null;
-    confirmedUser.validated = true;
-    await confirmedUser.save();
-    res.json({ url: "User confirmed!" })
-    
-   } catch (error) {
-    console.log(error)
-   }
+    try {
+        confirmedUser.token = null;
+        confirmedUser.validated = true;
+        await confirmedUser.save();
+        res.json({ url: "User confirmed!" })
+
+    } catch (error) {
+        console.log(error)
+    }
 }
 
 const profile = async (req, res) => {
     const user = req.user.toObject();
 
-    const updatedUser = {...user, avatar: user.avatar?{data: user.avatar.data.toString('base64'), contentType: user.avatar.contentType} : null} 
-    res.json({updatedUser})
-    
-    
- }
- 
+    const updatedUser = { ...user, avatar: user.avatar ? { data: user.avatar.data.toString('base64'), contentType: user.avatar.contentType } : null }
+    res.json({ updatedUser })
+
+
+}
+
 const updateProfile = async (req, res) => {
-    const {id} = req.params
+    const { id } = req.params
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({ message: 'Invalid ID' });
@@ -95,9 +95,9 @@ const updateProfile = async (req, res) => {
     } catch (error) {
         console.log(error)
     }
-    
- }
- 
+
+}
+
 
 const authenticate = async (req, res) => {
     const { email, password } = req.body
@@ -116,11 +116,16 @@ const authenticate = async (req, res) => {
     if (await existUser.checkPassword(password)) {
         res.json({
             _id: existUser._id,
-            avatar: existUser.avatar,
             name: existUser.name,
             email: existUser.email,
             phone: existUser.phone,
             bio: existUser.bio,
+            avatar: existUser.avatar
+                ? {
+                    data: existUser.avatar.data.toString('base64'),
+                    contentType: existUser.avatar.contentType
+                }
+                : null,
             profession: existUser.profession,
             token: generateJwt(existUser.id),
         })
