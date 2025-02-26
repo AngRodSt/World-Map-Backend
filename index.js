@@ -13,6 +13,7 @@ dotenv.config()
 conectDB();
 
 
+
 //cors
 const domainsAllowed = [process.env.FRONTEND_URL]
 

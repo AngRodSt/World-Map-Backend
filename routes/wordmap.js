@@ -2,7 +2,7 @@ import express from 'express'
 import multer from 'multer';
 import { register, authenticate, confirm, profile, updateProfile } from '../controllers/UserController.js';
 import { saveCountry, getCountrys, deleteCountry, updateCountry } from '../controllers/MapController.js';
-import { saveNote, getNotes, deleteNote, updateNote } from '../controllers/NoteController.js';
+import { saveNote, getNotes, deleteNote, updateNote, filterNote } from '../controllers/NoteController.js';
 import checkAuth from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -29,5 +29,8 @@ router.route("/notes").post(checkAuth, saveNote).get(checkAuth, getNotes)
 router.route("/notes/:id")
     .delete(checkAuth ,deleteNote)
     .put(checkAuth, updateNote)
+
+
+router.post("/notes/filter", checkAuth, filterNote)
 
 export default router;
