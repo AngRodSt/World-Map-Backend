@@ -1,6 +1,5 @@
 import express from 'express'
 import multer from 'multer';
-    newPassword
 import { register, authenticate, confirm, profile, updateProfile, sendEmailResetPassword, newPassword } from '../controllers/UserController.js';
 import { saveCountry, getCountrys, deleteCountry, updateCountry } from '../controllers/MapController.js';
 import { saveNote, getNotes, deleteNote, updateNote, filterNote } from '../controllers/NoteController.js';
