@@ -9,25 +9,29 @@ const UserSchema = mongoose.Schema({
         trim: true
     },
     avatar: {
-        data: Buffer,
-        contentType: String
+        data: { type: Buffer, default: null },
+        contentType: { type: String, default: '' }
     },
     bio: {
         type: String,
         required: false,
-        trim: true
+        trim: true,
+        default: null
     },
     phone: {
         type: String,
-        required: false
+        required: false,
+        default: null
     },
     birthDate: {
         type: Date,
-        required: false
+        required: false,
+        default: null
     },
     profession: {
         type: String,
-        required: false
+        required: false,
+        default: null
     },
     email:{
         type: String,
