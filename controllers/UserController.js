@@ -2,6 +2,7 @@ import User from "../models/User.js";
 import generateId from "../helpers/generateId.js";
 import generateJwt from "../helpers/generateJwt.js";
 import emailRegister from "../helpers/emailRegister.js";
+import emailResetPassword from "../helpers/emailResetPassword.js";
 import mongoose from "mongoose";
 
 const register = async (req, res) => {
@@ -51,10 +52,14 @@ const confirm = async (req, res) => {
 }
 
 const profile = async (req, res) => {
-    const user = req.user.toObject();
-
-    const updatedUser = { ...user, avatar: user.avatar ? { data: user.avatar.data.toString('base64'), contentType: user.avatar.contentType } : null }
-    res.json({ updatedUser })
+    let user = req.user
+    let updatedUser
+    if (user.avatar.data !== null) {
+        user = req.user.toObject();
+        updatedUser = { ...user, avatar: user.avatar ? { data: user.avatar.data.toString('base64'), contentType: user.avatar.contentType } : null }
+        return res.json({ updatedUser })
+    }
+    res.json({ user })
 
 
 }
@@ -69,7 +74,7 @@ const updateProfile = async (req, res) => {
     const currentUser = await User.findById(id);
 
     if (!currentUser) {
-        return res.status(400).json({ msg: "Non-existent Note" })
+        return res.status(400).json({ msg: "Non-existent User" })
     }
 
     if (currentUser._id.toString() !== id.toString()) {
@@ -86,6 +91,9 @@ const updateProfile = async (req, res) => {
     if (req.file) {
         currentUser.avatar.data = req.file.buffer;
         currentUser.avatar.contentType = req.file.mimetype;
+    }
+    else {
+        currentUser.avatar = currentUser.avatar
     }
 
     try {
@@ -120,12 +128,13 @@ const authenticate = async (req, res) => {
             email: existUser.email,
             phone: existUser.phone,
             bio: existUser.bio,
-            avatar: existUser.avatar
+            avatar: existUser.avatar.data !== null
                 ? {
                     data: existUser.avatar.data.toString('base64'),
                     contentType: existUser.avatar.contentType
                 }
-                : null,
+                : existUser.avatar,
+
             profession: existUser.profession,
             token: generateJwt(existUser.id),
         })
@@ -137,11 +146,56 @@ const authenticate = async (req, res) => {
 
 }
 
+const sendEmailResetPassword = async (req, res) => {
+    const { email } = req.body
+   
+    const existUser = await User.findOne({ email })
+    if (!existUser) {
+        const error = new Error("User doesn't exist")
+        return res.status(400).json({ msg: error.message })
+    }
+    try {
+        existUser.token = generateId()
+        await existUser.save()
+        emailResetPassword({
+            email,
+            token: existUser.token
+        })
+        res.status(200).json({msg: "Email send it correctly, please check your imbox"})
+    }
+    catch (error) {
+        console.log(error)
+    }
+}
+
+const newPassword = async (req, res) => {
+    const { token } = req.params
+    console.log(token)
+    const {password} = req.body
+
+    const userSaved = await User.findOne({ token })
+    if (!userSaved) {
+        const error = new Error('Some server error');
+        return res.status(404).json({ msg: error.message })
+    }
+
+    try {
+        userSaved.password = password;
+        userSaved.token = null;
+        await userSaved.save();
+        res.json({ url: "Password Changed Correctly" })
+
+    } catch (error) {
+        console.log(error)
+    }
+}
 
 export {
     register,
     confirm,
     authenticate,
     profile,
-    updateProfile
+    updateProfile,
+    sendEmailResetPassword,
+    newPassword
 }
