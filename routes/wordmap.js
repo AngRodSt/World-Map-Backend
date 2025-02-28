@@ -1,6 +1,6 @@
 import express from 'express'
 import multer from 'multer';
-import { register, authenticate, confirm, profile, updateProfile, sendEmailResetPassword, newPassword } from '../controllers/UserController.js';
+import { register, authenticate, confirm, profile, updateProfile, sendEmailResetPassword, newPassword, changePassword } from '../controllers/UserController.js';
 import { saveCountry, getCountrys, deleteCountry, updateCountry } from '../controllers/MapController.js';
 import { saveNote, getNotes, deleteNote, updateNote, filterNote } from '../controllers/NoteController.js';
 import checkAuth from '../middleware/authMiddleware.js';
@@ -19,6 +19,7 @@ router.get("/profile", checkAuth, profile)
 router.post("/profile/:id", upload.single('avatar'), checkAuth, updateProfile)
 router.post("/resetPassword", sendEmailResetPassword)
 router.post("/resetPassword/:token", newPassword)
+router.post("/changePassword", checkAuth, changePassword)
 
 /*Country Routes*/
 router.route("/country").post(checkAuth, saveCountry).get(checkAuth, getCountrys)
