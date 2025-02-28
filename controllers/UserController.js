@@ -148,7 +148,7 @@ const authenticate = async (req, res) => {
 
 const sendEmailResetPassword = async (req, res) => {
     const { email } = req.body
-   
+
     const existUser = await User.findOne({ email })
     if (!existUser) {
         const error = new Error("User doesn't exist")
@@ -161,7 +161,7 @@ const sendEmailResetPassword = async (req, res) => {
             email,
             token: existUser.token
         })
-        res.status(200).json({msg: "Email send it correctly, please check your imbox"})
+        res.status(200).json({ msg: "Email send it correctly, please check your imbox" })
     }
     catch (error) {
         console.log(error)
@@ -170,8 +170,7 @@ const sendEmailResetPassword = async (req, res) => {
 
 const newPassword = async (req, res) => {
     const { token } = req.params
-    console.log(token)
-    const {password} = req.body
+    const { password } = req.body
 
     const userSaved = await User.findOne({ token })
     if (!userSaved) {
@@ -190,6 +189,31 @@ const newPassword = async (req, res) => {
     }
 }
 
+const changePassword = async (req, res) => {
+    const { currentPassword, newPassword } = req.body
+    const { id } = req.user
+    
+        const currentUser = await User.findById(id);
+        if (!currentUser) {
+            const error = new Error('Some server error');
+            return res.status(404).json({ msg: error.message })
+        }
+        try {
+            if (await currentUser.checkPassword(currentPassword)) {
+                currentUser.password = newPassword
+                await currentUser.save()
+                return res.json({ msg: 'Password updated successufully' })
+            }
+            const response = new Error("Password incorrect");
+            return res.status(403).json({ msg: response.message })
+        } catch (error) {
+            console.log(error)
+        }
+        
+    
+
+}
+
 export {
     register,
     confirm,
@@ -197,5 +221,6 @@ export {
     profile,
     updateProfile,
     sendEmailResetPassword,
-    newPassword
+    newPassword,
+    changePassword
 }
