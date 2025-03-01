@@ -52,14 +52,28 @@ const confirm = async (req, res) => {
 }
 
 const profile = async (req, res) => {
-    let user = req.user
-    let updatedUser
-    if (user.avatar.data !== null) {
-        user = req.user.toObject();
-        updatedUser = { ...user, avatar: user.avatar ? { data: user.avatar.data.toString('base64'), contentType: user.avatar.contentType } : null }
-        return res.json({ updatedUser })
+    try {
+        let user = req.user;
+        if (!user) {
+            return res.status(401).json({ msg: "Usuario no autenticado" });
+        }
+
+        user = user.toObject();
+
+        if (user.avatar?.data) {
+            user.avatar = {
+                data: user.avatar.data.toString("base64"),
+                contentType: user.avatar.contentType,
+            };
+        } else {
+            user.avatar = null;
+        }
+
+        res.json({ user });
+    } catch (error) {
+        console.error("Error en el perfil:", error);
+        res.status(500).json({ msg: "Error del servidor" });
     }
-    res.json({ user })
 
 
 }
