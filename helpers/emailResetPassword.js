@@ -18,7 +18,7 @@ const emailResetPassword = async (datos) => {
         to: email, 
         subject: 'Reset your password',
         text: 'Reset your password',
-        html: `<p>Hello, please reset your password by clicking the following link: <a href="${process.env.FRONTEND_URL}/resetNewPassword/${token}">Reset Password</a></p>
+        html: `<p>Hello, please reset your password by clicking the following link: <a href="${process.env.FRONTEND_URL}/worldsxmap/resetPassword/${token}">Reset Password</a></p>
         
         <p>If you didn't create this account, could ignore this message</p>
         `,

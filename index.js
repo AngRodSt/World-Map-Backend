@@ -2,7 +2,7 @@ import express from 'express'
 import dotenv from 'dotenv'
 import cors from 'cors'
 import conectDB from './config/db.js';
-import wordmap from './routes/wordmap.js'
+import worldmap from './routes/worldmap.js'
 
 const app = express();
 const PORT = 3000;
@@ -30,7 +30,7 @@ const corsConfig = {
 
 app.use(cors(corsConfig))
 
-app.use('/wordmap', wordmap)
+app.use('/worldmap', worldmap)
 
 
 app.listen(PORT, ()=> {

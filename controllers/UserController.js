@@ -44,7 +44,7 @@ const confirm = async (req, res) => {
         confirmedUser.token = null;
         confirmedUser.validated = true;
         await confirmedUser.save();
-        res.json({ url: "User confirmed!" })
+        res.json({ msg: "User confirmed!" })
 
     } catch (error) {
         console.log(error)
@@ -62,11 +62,14 @@ const profile = async (req, res) => {
 
         if (user.avatar?.data) {
             user.avatar = {
-                data: user.avatar.data.toString("base64"),
+                data: Buffer.isBuffer(user.avatar.data) ? user.avatar.data.toString("base64") : user.avatar.data,
                 contentType: user.avatar.contentType,
             };
         } else {
-            user.avatar = null;
+            user.avatar =  {
+                data: null,
+                contentType: "",
+            };
         }
 
         res.json({ user });
@@ -103,17 +106,28 @@ const updateProfile = async (req, res) => {
     currentUser.bio = req.body.bio || currentUser.bio
 
     if (req.file) {
-        currentUser.avatar.data = req.file.buffer;
-        currentUser.avatar.contentType = req.file.mimetype;
-    }
-    else {
-        currentUser.avatar = currentUser.avatar
-    }
+        currentUser.avatar = {
+            data: req.file.buffer,
+            contentType: req.file.mimetype,
+        };
+    } 
+    
 
     try {
-        const updatedcurrentUser = await currentUser.save();
-        res.json(updatedcurrentUser);
-
+        const updatedUser = await currentUser.save();
+        let userResponse = updatedUser.toObject();
+        if (userResponse.avatar?.data) {
+            userResponse.avatar = {
+                data: userResponse.avatar.data.toString("base64"),
+                contentType: userResponse.avatar.contentType,
+            };
+        } else {
+            userResponse.avatar = {
+                data: null,
+                contentType: "",
+            };
+        }
+        res.json({ user: userResponse });
     } catch (error) {
         console.log(error)
     }
@@ -142,6 +156,7 @@ const authenticate = async (req, res) => {
             email: existUser.email,
             phone: existUser.phone,
             bio: existUser.bio,
+            birthDate: existUser.birthDate,
             avatar: existUser.avatar.data !== null
                 ? {
                     data: existUser.avatar.data.toString('base64'),
@@ -162,7 +177,6 @@ const authenticate = async (req, res) => {
 
 const sendEmailResetPassword = async (req, res) => {
     const { email } = req.body
-
     const existUser = await User.findOne({ email })
     if (!existUser) {
         const error = new Error("User doesn't exist")
@@ -188,7 +202,7 @@ const newPassword = async (req, res) => {
 
     const userSaved = await User.findOne({ token })
     if (!userSaved) {
-        const error = new Error('Some server error');
+        const error = new Error('Invalid User');
         return res.status(404).json({ msg: error.message })
     }
 
@@ -196,7 +210,7 @@ const newPassword = async (req, res) => {
         userSaved.password = password;
         userSaved.token = null;
         await userSaved.save();
-        res.json({ url: "Password Changed Correctly" })
+        res.json({ msg: "Password Changed Correctly" })
 
     } catch (error) {
         console.log(error)
