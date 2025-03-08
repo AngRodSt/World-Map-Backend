@@ -13,18 +13,22 @@ const getNotes = async (req, res) => {
 
 const filterNote = async (req, res) => {
     const { country, date } = req.body
+    let dateNoteFilter = date
+    if(date) dateNoteFilter = new Date(date).toISOString().split('T')[0]
+    
+    
     try {
         const notes = await Note.find()
             .where("user")
             .equals(req.user)
-
+       
         const filteredNotes = notes.filter(note => {
             const noteDate = new Date(note.date).toISOString().split('T')[0];
-            if (date && country) {
-                return noteDate === date && note.country === country
+            if (dateNoteFilter && country) {
+                return noteDate === dateNoteFilter && note.country === country
             }
             else if (!country) {
-                return noteDate === date
+                return noteDate === dateNoteFilter
             }
             else {
                 return note.country === country
