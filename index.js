@@ -15,20 +15,25 @@ conectDB();
 
 
 //cors
-const domainsAllowed = [process.env.FRONTEND_URL]
+// const domainsAllowed = [process.env.FRONTEND_URL]
 
-const corsConfig = {
-    origin: function(origin, callback){
-        if(domainsAllowed.indexOf(origin) !== -1){
-            callback(null, true)
-        }
-        else{
-            callback(new Error("Access Blocked"))
-        }
-    }
-}
+// const corsConfig = {
+//     origin: function(origin, callback){
+//         if(domainsAllowed.indexOf(origin) !== -1){
+//             callback(null, true)
+//         }
+//         else{
+//             callback(new Error("Access Blocked"))
+//         }
+//     }
+// }
 
-app.use(cors(corsConfig))
+app.use(cors({
+    origin: process.env.FRONTEND_URL, 
+    methods: ["GET", "POST", "PUT", "DELETE"], 
+    allowedHeaders: ["Content-Type", "Authorization"], 
+    credentials: true,
+}));
 
 app.use('/worldmap', worldmap)
 
